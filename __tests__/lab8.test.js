@@ -1,7 +1,7 @@
 describe('Basic user flow for Website', () => {
     // First, visit the lab 8 website
     beforeAll(async() => {
-        await page.goto('http://127.0.0.1:5500/index.html');
+        await page.goto('https://cse110-f2021.github.io/Lab8_Website');
     });
 
     // Next, check to make sure that all 20 <product-item> elements have loaded
@@ -98,6 +98,10 @@ describe('Basic user flow for Website', () => {
         // TODO - Step 5
         // At this point he item 'cart' in localStorage should be 
         // '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]', check to make sure it is
+
+        expect(await page.evaluate(() => {
+            return localStorage.getItem('cart');
+        })).toBe('[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]');
     });
 
     // Checking to make sure that if you remove all of the items from the cart that the cart
@@ -107,6 +111,20 @@ describe('Basic user flow for Website', () => {
         // TODO - Step 6
         // Go through and click "Remove from Cart" on every single <product-item>, just like above.
         // Once you have, check to make sure that #cart-count is now 0
+        const prodItems = await page.$$('product-item');
+
+        for (let i = 0; i < prodItems.length; ++i) {
+            const prodItem = await prodItems[i];
+            const shadowRoot = await prodItem.getProperty('shadowRoot');
+            var button = await shadowRoot.$('button');
+            await button.click();
+        }
+
+        const carCount = await page.$('#cart-count');
+        const result = await carCount.getProperty('innerText');
+        const resultJasonValue = await result.jsonValue();
+        expect(resultJasonValue).toBe('0');
+
     }, 10000);
 
     // Checking to make sure that it remembers us removing everything from the cart
